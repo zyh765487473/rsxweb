@@ -7,6 +7,7 @@
       </el-button>
       <el-dropdown-menu slot="dropdown">
         <el-dropdown-item @click.native="toSelect()">公共查询</el-dropdown-item>
+        <el-dropdown-item @click.native="toLoss()">流失词库</el-dropdown-item>
         <el-dropdown-item @click.native="toMy()">我的词库</el-dropdown-item>
         <el-dropdown-item @click.native="loginout()">退出登录</el-dropdown-item>
       </el-dropdown-menu>
@@ -102,6 +103,7 @@
           width="50">
           <template slot-scope="scope">
             <el-button @click="fpcommit(scope.row)" type="text" size="small">分配</el-button>
+            <el-button @click="losscommit(scope.row)" type="text" size="small">流拍</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -121,7 +123,7 @@ export default {
     CryptoJS,
     Cookies
   },
-  name: 'Login',
+  name: 'General',
   data () {
     return {
       name: '',
@@ -203,6 +205,43 @@ export default {
       this.fp = true
       this.par = param
     },
+    losscommit (param) {
+      this.$confirm('确定流拍了吗，请谨慎操作?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let nameId = Cookies.get('nameId')
+        let token = Cookies.get('token')
+        let md5 = nameId + token + '4f5af48e7ate8whfkjawA*456111' // 与后台的校验
+        md5 = CryptoJS.MD5(md5).toString()
+        let postData = {
+          token: token,
+          nameId: nameId,
+          id: param.id,
+          md5: md5
+        }
+        axios.post('http://121.37.191.238:8083/lexicon/update/loss/admin', postData)
+          .then(response => {
+            if (response.data.code !== 1) {
+              this.messageInfoErr(response.data.message)
+            // this.$router.push({name: 'login'})
+            } else {
+            // 成功以后页面刷新
+            // location.reload()
+              this.messageInfo('流拍成功！如需要查询请刷新页面')
+            }
+          })
+          .catch(error => {
+            console.error('There was an error!', error)
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '取消操作'
+        })
+      })
+    },
     nameUpdate () {
       let param = this.par
       let nameId = Cookies.get('nameId')
@@ -235,6 +274,9 @@ export default {
     },
     toSelect () {
       this.$router.push({name: 'select'})
+    },
+    toLoss () {
+      this.$router.push({name: 'loss'})
     },
     toMy () {
       this.$router.push({name: 'user'})

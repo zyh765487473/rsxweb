@@ -7,6 +7,7 @@
       </el-button>
       <el-dropdown-menu slot="dropdown">
         <el-dropdown-item @click.native="toSelect()">公共查询</el-dropdown-item>
+        <el-dropdown-item @click.native="toLoss()">流失词库</el-dropdown-item>
         <el-dropdown-item v-if="gen" @click.native="toGeneral()">公共词库</el-dropdown-item>
         <el-dropdown-item @click.native="loginout()">退出登录</el-dropdown-item>
       </el-dropdown-menu>
@@ -134,10 +135,10 @@
         <el-table-column
           fixed=""
           label="操作"
-          width="200">
+          width="220">
           <template slot-scope="scope">
-            <el-button @click="look()" type="text" size="small">查看</el-button>
-            <el-button @click="sjcommit(scope.row)" type="text" size="small">上架</el-button>
+            <el-button @click="sjcommit(scope.row)" type="text" size="small">上架主图</el-button>
+            <el-button @click="sjwccommit(scope.row)" type="text" size="small">上架完成</el-button>
             <el-button @click="registrationUpdate(scope.row)" type="text" size="small">注册</el-button>
             <el-button @click="bzcommit(scope.row)" type="text" size="small">备注</el-button>
           </template>
@@ -159,7 +160,7 @@ export default {
     CryptoJS,
     Cookies
   },
-  name: 'Login',
+  name: 'User',
   data () {
     return {
       name: '',
@@ -269,6 +270,32 @@ export default {
         })
       })
     },
+    sjwccommit (param) {
+      this.$confirm('确定上架完成了吗，请谨慎操作?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let nameId = Cookies.get('nameId')
+        let token = Cookies.get('token')
+        let type = '3'
+        let md5 = token + nameId + type + '4f5af48e7ate8whfkjawA*456111' // 与后台的校验
+        md5 = CryptoJS.MD5(md5).toString()
+        let postData = {
+          token: token,
+          nameId: nameId,
+          id: param.id,
+          type: type,
+          md5: md5
+        }
+        this.updateStatusIn(postData)
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '取消操作'
+        })
+      })
+    },
     remarksUpdate () {
       let param = this.par
       let nameId = Cookies.get('nameId')
@@ -331,6 +358,9 @@ export default {
     },
     toSelect () {
       this.$router.push({name: 'select'})
+    },
+    toLoss () {
+      this.$router.push({name: 'loss'})
     },
     commit () {
       let nameId = Cookies.get('nameId')

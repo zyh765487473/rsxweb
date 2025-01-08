@@ -4,6 +4,7 @@ import Login from '@/components/Login'
 import User from '@/components/User'
 import Select from '@/components/Select'
 import General from '@/components/General'
+import Loss from '@/components/Loss'
 
 Vue.use(Router)
 
@@ -29,6 +30,11 @@ export default new Router({
       path: '/general',
       name: 'general',
       component: General
+    },
+    {
+      path: '/loss',
+      name: 'loss',
+      component: Loss
     }
   ]
 })
